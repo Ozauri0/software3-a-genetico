@@ -96,6 +96,8 @@ Si dice **Factible: SI**, la solución respeta todas las restricciones duras.
 
 **Qué busca:** acumular 15 repeticiones por cada combinación de variante × hilos × instancia, tal como exige la rúbrica (sección 7). Esto genera los datos para calcular speed-up y eficiencia.
 
+### En Windows (PowerShell)
+
 ```powershell
 .\run_experiments.ps1
 ```
@@ -108,14 +110,76 @@ El script ejecuta automáticamente:
 
 Todos los resultados se acumulan en `results/resultados.csv`.
 
-**Si quieres probar solo con la instancia pequeña y 3 repeticiones (más rápido):**
+#### Opciones disponibles
+
+| Parámetro | Descripción | Ejemplo |
+|---|---|---|
+| `-Clean` | **Limpia el CSV antes de empezar** para evitar contaminación con filas de pruebas anteriores | `-Clean` |
+| `-Instance` | Ejecutar solo una instancia (`all` \| `small` \| `medium` \| `large`) | `-Instance large` |
+| `-Reps` | Número de semillas / repeticiones (por defecto 15) | `-Reps 3` |
+| `-SkipGen` | No regenerar instancias (si ya existen en `data/`) | `-SkipGen` |
+| `-DryRun` | Ver los comandos que se ejecutarían sin ejecutar nada | `-DryRun` |
+| `-Exe` | Ruta al ejecutable (por defecto `./mochila_ga`) | `-Exe ./mochila_ga` |
+
+#### Ejemplos de uso
+
 ```powershell
+# Experimento completo desde cero (recomendado para entrega final)
+.\run_experiments.ps1 -Clean
+
+# Solo instancia pequeña con 3 repeticiones (prueba rápida)
 .\run_experiments.ps1 -Instance small -Reps 3
+
+# Re-ejecutar large sin borrar los otros resultados
+.\run_experiments.ps1 -Instance large -SkipGen -Clean
+
+# Ver todos los comandos sin ejecutar nada
+.\run_experiments.ps1 -DryRun
 ```
 
-**Si quieres ver los comandos antes de ejecutar:**
-```powershell
-.\run_experiments.ps1 -DryRun
+> **Importante:** siempre usa `-Clean` cuando quieras un experimento limpio. Sin él, las filas se acumulan y pueden contaminar las métricas con ejecuciones manuales previas.
+
+---
+
+### En Linux / Ubuntu (Bash)
+
+Primero compila con soporte OpenMP:
+```bash
+sudo apt install g++ libomp-dev   # solo la primera vez
+g++ -O2 -fopenmp -std=c++17 src/*.cpp -o mochila_ga
+```
+
+Luego habilita y ejecuta el script equivalente:
+```bash
+chmod +x run_experiments.sh   # solo la primera vez
+./run_experiments.sh
+```
+
+#### Opciones disponibles (bash)
+
+| Flag | Descripción | Ejemplo |
+|---|---|---|
+| `--clean` | Limpia el CSV antes de empezar | `--clean` |
+| `--instance` | Solo una instancia (`all` \| `small` \| `medium` \| `large`) | `--instance large` |
+| `--reps N` | Número de repeticiones (por defecto 15) | `--reps 3` |
+| `--skip-gen` | No regenerar instancias | `--skip-gen` |
+| `--dry-run` | Ver comandos sin ejecutar | `--dry-run` |
+| `--exe` | Ruta al ejecutable | `--exe ./mochila_ga` |
+
+#### Ejemplos de uso
+
+```bash
+# Experimento completo desde cero
+./run_experiments.sh --clean
+
+# Solo instancia pequeña con 3 repeticiones
+./run_experiments.sh --instance small --reps 3
+
+# Re-ejecutar large sin borrar los otros resultados
+./run_experiments.sh --instance large --skip-gen --clean
+
+# Ver todos los comandos sin ejecutar nada
+./run_experiments.sh --dry-run
 ```
 
 ---
@@ -165,7 +229,7 @@ g++ -O2 -fopenmp -std=c++17 src/*.cpp -o mochila_ga
 ./mochila_ga --instance data/small --variant islands --seed 42
 
 # 4. Experimento completo (las 15 repeticiones de la rúbrica)
-.\run_experiments.ps1
+.\run_experiments.ps1 -Clean
 
 # 5. Obtener métricas para el informe
 ./mochila_ga --analyze --results results/resultados.csv

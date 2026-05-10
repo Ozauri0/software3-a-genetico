@@ -118,31 +118,12 @@ if [[ $CLEAN -eq 1 ]]; then
     METRICS="${RESULTS_DIR}/metricas.csv"
 
     if [[ $DRY_RUN -eq 1 ]]; then
-        echo -e "${GY}  [DRY][CLEAN] Se eliminarian filas de '$INSTANCE' en $RESULTS${NC}"
-    elif [[ "$INSTANCE" == "all" ]]; then
-        # Eliminar archivos completos
+        echo -e "${GY}  [DRY][CLEAN] Se eliminarian: $RESULTS y $METRICS${NC}"
+    else
         for f in "$RESULTS" "$METRICS"; do
             if [[ -f "$f" ]]; then
                 rm -f "$f"
                 echo -e "${DY}  [CLEAN] Eliminado: $f${NC}"
-            fi
-        done
-    else
-        # Eliminar solo filas de la instancia seleccionada usando awk
-        inst_path="${INST_NAME[$INSTANCE]}"
-        for f in "$RESULTS" "$METRICS"; do
-            if [[ -f "$f" ]]; then
-                tmp=$(mktemp)
-                removed=0
-                while IFS= read -r line; do
-                    if echo "$line" | grep -qF "$inst_path"; then
-                        (( removed++ )) || true
-                    else
-                        echo "$line" >> "$tmp"
-                    fi
-                done < "$f"
-                mv "$tmp" "$f"
-                echo -e "${DY}  [CLEAN] $f: eliminadas $removed filas de '$INSTANCE'${NC}"
             fi
         done
     fi

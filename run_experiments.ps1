@@ -83,35 +83,14 @@ if ($Clean) {
     $metrics     = Join-Path $results_dir "metricas.csv"
 
     if (-not $DryRun) {
-        # Si -Instance es 'all', eliminar los archivos completos
-        if ($Instance -eq "all") {
-            if (Test-Path $Results) {
-                Remove-Item $Results -Force
-                Write-Host "  [CLEAN] Eliminado: $Results" -ForegroundColor DarkYellow
-            }
-            if (Test-Path $metrics) {
-                Remove-Item $metrics -Force
-                Write-Host "  [CLEAN] Eliminado: $metrics" -ForegroundColor DarkYellow
-            }
-        } else {
-            # Solo eliminar filas de la instancia seleccionada del CSV
-            $instNames = $Instances | ForEach-Object { $_.Name }
-            foreach ($csv in @($Results, $metrics)) {
-                if (Test-Path $csv) {
-                    $h     = Get-Content $csv | Select-Object -First 1
-                    $rows  = Get-Content $csv | Select-Object -Skip 1
-                    $clean = $rows | Where-Object {
-                        $line = $_
-                        -not ($instNames | Where-Object { $line -match [regex]::Escape($_) })
-                    }
-                    ($h + "`n" + ($clean -join "`n")) | Set-Content $csv -Encoding UTF8
-                    $removed = $rows.Count - $clean.Count
-                    Write-Host "  [CLEAN] ${csv}: eliminadas $removed filas de '$Instance'" -ForegroundColor DarkYellow
-                }
+        foreach ($csv in @($Results, $metrics)) {
+            if (Test-Path $csv) {
+                Remove-Item $csv -Force
+                Write-Host "  [CLEAN] Eliminado: $csv" -ForegroundColor DarkYellow
             }
         }
     } else {
-        Write-Host "  [DRY][CLEAN] Se eliminarian filas de '$Instance' en $Results" -ForegroundColor DarkGray
+        Write-Host "  [DRY][CLEAN] Se eliminarian: $Results y $metrics" -ForegroundColor DarkGray
     }
     Write-Host ""
 }

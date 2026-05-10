@@ -200,7 +200,7 @@ void KnapsackGA::runOneGeneration() {
 #endif
         std::mt19937 local_rng(params_.seed + tid + generation_ * 1000);
 
-        #pragma omp for schedule(dynamic)
+        #pragma omp for schedule(static)
         for (int pair = 0; pair < pairs_needed; ++pair) {
             int idx1 = elite + pair * 2;
             int idx2 = elite + pair * 2 + 1;

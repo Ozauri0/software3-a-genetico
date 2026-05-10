@@ -1,0 +1,4 @@
+#ignoring metricas and resultados
+
+results/metricas.csv
+results/resultados.csv

@@ -42,7 +42,7 @@ ROWS=$(filtrar "instancia" "$INSTANCIA")
 echo ""
 echo "=== TABLA DE MÉTRICAS ==="
 printf "  %-12s %-6s %-9s %10s %10s %12s %10s %9s %8s %7s\n" \
-    Variante Hilos Instancia AvgTime(ms) StdTime(ms) AvgValor StdValor Speedup Efic. "%Fact."
+    Variante Hilos Instancia "AvgTime(ms)" "StdTime(ms)" AvgValor StdValor Speedup Efic. "%Fact."
 printf "  %s\n" "$(printf '─%.0s' {1..95})"
 echo "$ROWS" | fmt_row
 

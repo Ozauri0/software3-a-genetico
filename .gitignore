@@ -1,4 +1,3 @@
-#ignoring metricas and resultados
-
-results/metricas.csv
-results/resultados.csv
+# Ignore all generated files in results/ but keep the folder
+results/*
+!results/.gitkeep

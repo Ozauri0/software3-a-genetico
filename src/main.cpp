@@ -336,6 +336,7 @@ static void analyzeResults(const std::string& results_path) {
         std::string variante, instancia;
         int    hilos, n;
         double avg_time, std_time;
+        double avg_valor, std_valor;
         double max_fitness, max_valor_factible;
         double pct_factibles;
         double speedup = 0.0, eficiencia = 0.0;
@@ -351,10 +352,13 @@ static void analyzeResults(const std::string& results_path) {
         s.max_fitness          = -1e18;
         s.max_valor_factible   = 0.0;
         double sum_t = 0.0, sum_t2 = 0.0;
+        double sum_v = 0.0, sum_v2 = 0.0;
         int factibles = 0;
         for (auto* r : grp) {
             sum_t  += r->tiempo_ms;
             sum_t2 += r->tiempo_ms * r->tiempo_ms;
+            sum_v  += r->mejor_valor_factible;
+            sum_v2 += r->mejor_valor_factible * r->mejor_valor_factible;
             if (r->mejor_fitness > s.max_fitness)
                 s.max_fitness = r->mejor_fitness;
             if (r->mejor_valor_factible > s.max_valor_factible)
@@ -362,8 +366,11 @@ static void analyzeResults(const std::string& results_path) {
             if (r->factible) ++factibles;
         }
         s.avg_time      = sum_t / s.n;
-        double var      = (sum_t2 / s.n) - (s.avg_time * s.avg_time);
-        s.std_time      = (var > 0.0) ? std::sqrt(var) : 0.0;
+        double var_t    = (sum_t2 / s.n) - (s.avg_time * s.avg_time);
+        s.std_time      = (var_t > 0.0) ? std::sqrt(var_t) : 0.0;
+        s.avg_valor     = sum_v / s.n;
+        double var_v    = (sum_v2 / s.n) - (s.avg_valor * s.avg_valor);
+        s.std_valor     = (var_v > 0.0) ? std::sqrt(var_v) : 0.0;
         s.pct_factibles = 100.0 * factibles / s.n;
         all_stats.push_back(s);
     }
@@ -397,12 +404,13 @@ static void analyzeResults(const std::string& results_path) {
     {
         std::ofstream f(metrics_path);
         f << "variante,hilos,instancia,n,avg_time_ms,std_time_ms,"
-             "max_fitness,max_valor_factible,pct_factibles,speedup,eficiencia\n";
+             "avg_valor,std_valor,max_fitness,max_valor_factible,pct_factibles,speedup,eficiencia\n";
         for (auto& s : all_stats)
             f << s.variante << "," << s.hilos << "," << s.instancia << ","
               << s.n << ","
               << std::fixed << std::setprecision(4)
               << s.avg_time << "," << s.std_time << ","
+              << s.avg_valor << "," << s.std_valor << ","
               << s.max_fitness << "," << s.max_valor_factible << ","
               << std::setprecision(1) << s.pct_factibles << ","
               << std::setprecision(4) << s.speedup << ","
@@ -410,7 +418,7 @@ static void analyzeResults(const std::string& results_path) {
     }
 
     // Imprimir tabla en consola
-    const int C1=12, C2=7, C3=14, C4=12, C5=12, C6=14, C7=12, C8=10, C9=10;
+    const int C1=12, C2=7, C3=14, C4=12, C5=12, C6=16, C7=16, C8=12, C9=10, C10=10;
     std::cout << "\n=== METRICAS EXPERIMENTALES ===\n"
               << std::left
               << std::setw(C1) << "Variante"
@@ -418,11 +426,12 @@ static void analyzeResults(const std::string& results_path) {
               << std::setw(C3) << "Instancia"
               << std::setw(C4) << "Avg(ms)"
               << std::setw(C5) << "Std(ms)"
-              << std::setw(C6) << "Mejor Valor"
-              << std::setw(C7) << "% Factible"
-              << std::setw(C8) << "Speed-up"
-              << std::setw(C9) << "Efic." << "\n"
-              << std::string(C1+C2+C3+C4+C5+C6+C7+C8+C9, '-') << "\n";
+              << std::setw(C6) << "AvgValor"
+              << std::setw(C7) << "StdValor"
+              << std::setw(C8) << "% Factible"
+              << std::setw(C9) << "Speed-up"
+              << std::setw(C10) << "Efic." << "\n"
+              << std::string(C1+C2+C3+C4+C5+C6+C7+C8+C9+C10, '-') << "\n";
     for (auto& s : all_stats)
         std::cout << std::left
                   << std::setw(C1) << s.variante
@@ -431,12 +440,13 @@ static void analyzeResults(const std::string& results_path) {
                   << std::fixed << std::setprecision(2)
                   << std::setw(C4) << s.avg_time
                   << std::setw(C5) << s.std_time
-                  << std::setw(C6) << s.max_valor_factible
+                  << std::setw(C6) << s.avg_valor
+                  << std::setw(C7) << s.std_valor
                   << std::setprecision(1)
-                  << std::setw(C7) << s.pct_factibles
+                  << std::setw(C8) << s.pct_factibles
                   << std::setprecision(3)
-                  << std::setw(C8) << s.speedup
-                  << std::setw(C9) << s.eficiencia << "\n";
+                  << std::setw(C9) << s.speedup
+                  << std::setw(C10) << s.eficiencia << "\n";
 
     std::cout << "\nMetricas exportadas a: " << metrics_path << "\n";
 }
